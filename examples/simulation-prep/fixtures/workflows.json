@@ -1,0 +1,615 @@
+{
+  "fixtureVersion": 1,
+  "synthetic": true,
+  "status": "fixed synthetic inputs for the completed replay; never product evidence",
+  "serviceFormat": "neutral experiment input; NOT the Promise service policy schema",
+  "projects": {
+    "reportcheck": {
+      "scenarioCatalogue": {
+        "import-batch.1": {
+          "title": "valid rows are retained",
+          "altitude": "data"
+        },
+        "import-batch.2": {
+          "title": "missing columns reject the batch",
+          "altitude": "response"
+        },
+        "import-batch.3": {
+          "title": "malformed grades identify the affected row",
+          "altitude": "response"
+        },
+        "import-batch.4": {
+          "title": "duplicate student rows are explained",
+          "altitude": "response"
+        },
+        "review-findings.1": {
+          "title": "a spelling error is flagged",
+          "altitude": "judgement"
+        },
+        "review-findings.2": {
+          "title": "a grammar error is flagged",
+          "altitude": "judgement"
+        },
+        "review-findings.3": {
+          "title": "a grade inconsistency is flagged",
+          "altitude": "judgement"
+        },
+        "review-findings.4": {
+          "title": "cross-student copied text is flagged",
+          "altitude": "judgement"
+        },
+        "review-findings.5": {
+          "title": "a false positive can be dismissed",
+          "altitude": "perception"
+        },
+        "teacher-feedback.1": {
+          "title": "each teacher receives only their own prepared output",
+          "altitude": "response"
+        },
+        "teacher-feedback.2": {
+          "title": "review decisions survive into the output",
+          "altitude": "response"
+        },
+        "teacher-feedback.3": {
+          "title": "unresolved findings block a final export",
+          "altitude": "response"
+        },
+        "review-findings.6": {
+          "title": "a common benign phrase is not treated as copied-report evidence",
+          "altitude": "judgement"
+        },
+        "review-findings.7": {
+          "title": "a same-student revision is compared with its earlier version",
+          "altitude": "judgement"
+        },
+        "year-summary.1": {
+          "title": "the principal can prepare a year-wide review summary",
+          "altitude": "response"
+        }
+      },
+      "stages": [
+        {
+          "id": "initial",
+          "jobs": {
+            "import-batch": [
+              "import-batch.1",
+              "import-batch.2",
+              "import-batch.3",
+              "import-batch.4"
+            ],
+            "review-findings": [
+              "review-findings.1",
+              "review-findings.2",
+              "review-findings.3",
+              "review-findings.4",
+              "review-findings.5"
+            ],
+            "teacher-feedback": [
+              "teacher-feedback.1",
+              "teacher-feedback.2",
+              "teacher-feedback.3"
+            ]
+          },
+          "stubResults": {
+            "import-batch.1": true,
+            "import-batch.2": true,
+            "import-batch.3": true,
+            "import-batch.4": true,
+            "review-findings.1": true,
+            "review-findings.2": true,
+            "review-findings.3": true,
+            "review-findings.4": true,
+            "review-findings.5": true,
+            "teacher-feedback.1": true,
+            "teacher-feedback.2": true,
+            "teacher-feedback.3": true
+          },
+          "notice": "Fixed synthetic inputs, not a run or proof.",
+          "serviceObservationRefs": [
+            "interactive-result-1",
+            "service-access-1",
+            "peak-work-1",
+            "inclusive-use-1",
+            "fresh-observation-1"
+          ]
+        },
+        {
+          "id": "extensions-and-regression",
+          "jobs": {
+            "import-batch": [
+              "import-batch.1",
+              "import-batch.2",
+              "import-batch.3",
+              "import-batch.4"
+            ],
+            "review-findings": [
+              "review-findings.1",
+              "review-findings.2",
+              "review-findings.3",
+              "review-findings.4",
+              "review-findings.5",
+              "review-findings.6",
+              "review-findings.7"
+            ],
+            "teacher-feedback": [
+              "teacher-feedback.1",
+              "teacher-feedback.2",
+              "teacher-feedback.3"
+            ]
+          },
+          "stubResults": {
+            "import-batch.1": true,
+            "import-batch.2": true,
+            "import-batch.3": true,
+            "import-batch.4": true,
+            "review-findings.1": true,
+            "review-findings.2": true,
+            "review-findings.3": true,
+            "review-findings.4": true,
+            "review-findings.5": true,
+            "review-findings.6": true,
+            "review-findings.7": true,
+            "teacher-feedback.1": true,
+            "teacher-feedback.2": false,
+            "teacher-feedback.3": true
+          },
+          "notice": "Fixed synthetic inputs, not a run or proof.",
+          "serviceObservationRefs": [
+            "interactive-result-2",
+            "service-access-1",
+            "peak-work-1",
+            "inclusive-use-2",
+            "fresh-observation-1"
+          ]
+        },
+        {
+          "id": "new-job-and-recovery",
+          "jobs": {
+            "import-batch": [
+              "import-batch.1",
+              "import-batch.2",
+              "import-batch.3",
+              "import-batch.4"
+            ],
+            "review-findings": [
+              "review-findings.1",
+              "review-findings.2",
+              "review-findings.3",
+              "review-findings.4",
+              "review-findings.5",
+              "review-findings.6",
+              "review-findings.7"
+            ],
+            "teacher-feedback": [
+              "teacher-feedback.1",
+              "teacher-feedback.2",
+              "teacher-feedback.3"
+            ],
+            "year-summary": [
+              "year-summary.1"
+            ]
+          },
+          "stubResults": {
+            "import-batch.1": true,
+            "import-batch.2": true,
+            "import-batch.3": true,
+            "import-batch.4": true,
+            "review-findings.1": true,
+            "review-findings.2": true,
+            "review-findings.3": true,
+            "review-findings.4": true,
+            "review-findings.5": true,
+            "review-findings.6": true,
+            "review-findings.7": true,
+            "teacher-feedback.1": true,
+            "teacher-feedback.2": true,
+            "teacher-feedback.3": true,
+            "year-summary.1": null
+          },
+          "notice": "Fixed synthetic inputs, not a run or proof.",
+          "serviceObservationRefs": [
+            "interactive-result-2",
+            "service-access-1",
+            "peak-work-1",
+            "inclusive-use-3",
+            "fresh-observation-1"
+          ]
+        }
+      ]
+    },
+    "borrowworks": {
+      "scenarioCatalogue": {
+        "reserve.1": {
+          "title": "an available slot is reserved",
+          "altitude": "response"
+        },
+        "reserve.2": {
+          "title": "a conflicting reservation is refused",
+          "altitude": "response"
+        },
+        "reserve.3": {
+          "title": "cancelling releases the slot",
+          "altitude": "data"
+        },
+        "reserve.4": {
+          "title": "an ineligible member is refused",
+          "altitude": "response"
+        },
+        "decide.1": {
+          "title": "a coordinator approves an eligible restricted booking",
+          "altitude": "response"
+        },
+        "decide.2": {
+          "title": "a coordinator refuses an unsafe request",
+          "altitude": "response"
+        },
+        "decide.3": {
+          "title": "cross-site approval is refused",
+          "altitude": "response"
+        },
+        "decide.4": {
+          "title": "an already cancelled request cannot be approved",
+          "altitude": "response"
+        },
+        "complete-loan.1": {
+          "title": "collection is recorded",
+          "altitude": "data"
+        },
+        "complete-loan.2": {
+          "title": "return is recorded",
+          "altitude": "data"
+        },
+        "complete-loan.3": {
+          "title": "a late return is shown to the coordinator",
+          "altitude": "perception"
+        },
+        "complete-loan.4": {
+          "title": "damage is attached to the loan",
+          "altitude": "data"
+        },
+        "maintain.1": {
+          "title": "quarantine prevents a new loan",
+          "altitude": "response"
+        },
+        "maintain.2": {
+          "title": "a pending booking shows the quarantine",
+          "altitude": "perception"
+        },
+        "maintain.3": {
+          "title": "inspection can release an item",
+          "altitude": "data"
+        },
+        "maintain.4": {
+          "title": "collection of a quarantined item is refused",
+          "altitude": "response"
+        },
+        "reserve.5": {
+          "title": "a waiting member gets a prepared offer",
+          "altitude": "response"
+        },
+        "reserve.6": {
+          "title": "an expired offer releases the slot",
+          "altitude": "data"
+        },
+        "reserve.7": {
+          "title": "a member can book using the keyboard flow",
+          "altitude": "perception"
+        },
+        "utilisation.1": {
+          "title": "the manager can prepare a utilisation report",
+          "altitude": "response"
+        }
+      },
+      "stages": [
+        {
+          "id": "initial",
+          "jobs": {
+            "reserve": [
+              "reserve.1",
+              "reserve.2",
+              "reserve.3",
+              "reserve.4"
+            ],
+            "decide": [
+              "decide.1",
+              "decide.2",
+              "decide.3",
+              "decide.4"
+            ],
+            "complete-loan": [
+              "complete-loan.1",
+              "complete-loan.2",
+              "complete-loan.3",
+              "complete-loan.4"
+            ],
+            "maintain": [
+              "maintain.1",
+              "maintain.2",
+              "maintain.3",
+              "maintain.4"
+            ]
+          },
+          "stubResults": {
+            "reserve.1": true,
+            "reserve.2": true,
+            "reserve.3": true,
+            "reserve.4": true,
+            "decide.1": true,
+            "decide.2": true,
+            "decide.3": true,
+            "decide.4": true,
+            "complete-loan.1": true,
+            "complete-loan.2": true,
+            "complete-loan.3": true,
+            "complete-loan.4": true,
+            "maintain.1": true,
+            "maintain.2": true,
+            "maintain.3": true,
+            "maintain.4": true
+          },
+          "notice": "Fixed synthetic inputs, not a run or proof.",
+          "serviceObservationRefs": [
+            "interactive-result-1",
+            "service-access-1",
+            "peak-work-1",
+            "inclusive-use-1",
+            "fresh-observation-1"
+          ]
+        },
+        {
+          "id": "extensions-and-regression",
+          "jobs": {
+            "reserve": [
+              "reserve.1",
+              "reserve.2",
+              "reserve.3",
+              "reserve.4",
+              "reserve.5",
+              "reserve.6",
+              "reserve.7"
+            ],
+            "decide": [
+              "decide.1",
+              "decide.2",
+              "decide.3",
+              "decide.4"
+            ],
+            "complete-loan": [
+              "complete-loan.1",
+              "complete-loan.2",
+              "complete-loan.3",
+              "complete-loan.4"
+            ],
+            "maintain": [
+              "maintain.1",
+              "maintain.2",
+              "maintain.3",
+              "maintain.4"
+            ]
+          },
+          "stubResults": {
+            "reserve.1": true,
+            "reserve.2": true,
+            "reserve.3": true,
+            "reserve.4": true,
+            "reserve.5": true,
+            "reserve.6": true,
+            "reserve.7": true,
+            "decide.1": true,
+            "decide.2": true,
+            "decide.3": false,
+            "decide.4": true,
+            "complete-loan.1": true,
+            "complete-loan.2": true,
+            "complete-loan.3": true,
+            "complete-loan.4": true,
+            "maintain.1": true,
+            "maintain.2": true,
+            "maintain.3": true,
+            "maintain.4": true
+          },
+          "notice": "Fixed synthetic inputs, not a run or proof.",
+          "serviceObservationRefs": [
+            "interactive-result-2",
+            "service-access-1",
+            "peak-work-1",
+            "inclusive-use-2",
+            "fresh-observation-1"
+          ]
+        },
+        {
+          "id": "new-job-and-recovery",
+          "jobs": {
+            "reserve": [
+              "reserve.1",
+              "reserve.2",
+              "reserve.3",
+              "reserve.4",
+              "reserve.5",
+              "reserve.6",
+              "reserve.7"
+            ],
+            "decide": [
+              "decide.1",
+              "decide.2",
+              "decide.3",
+              "decide.4"
+            ],
+            "complete-loan": [
+              "complete-loan.1",
+              "complete-loan.2",
+              "complete-loan.3",
+              "complete-loan.4"
+            ],
+            "maintain": [
+              "maintain.1",
+              "maintain.2",
+              "maintain.3",
+              "maintain.4"
+            ],
+            "utilisation": [
+              "utilisation.1"
+            ]
+          },
+          "stubResults": {
+            "reserve.1": true,
+            "reserve.2": true,
+            "reserve.3": true,
+            "reserve.4": true,
+            "reserve.5": true,
+            "reserve.6": true,
+            "reserve.7": true,
+            "decide.1": true,
+            "decide.2": true,
+            "decide.3": true,
+            "decide.4": true,
+            "complete-loan.1": true,
+            "complete-loan.2": true,
+            "complete-loan.3": true,
+            "complete-loan.4": true,
+            "maintain.1": true,
+            "maintain.2": true,
+            "maintain.3": true,
+            "maintain.4": true,
+            "utilisation.1": null
+          },
+          "notice": "Fixed synthetic inputs, not a run or proof.",
+          "serviceObservationRefs": [
+            "interactive-result-2",
+            "service-access-1",
+            "peak-work-1",
+            "inclusive-use-3",
+            "fresh-observation-1"
+          ]
+        }
+      ]
+    }
+  },
+  "sharedServiceFixtures": {
+    "interactive-result-1": {
+      "policyIdea": "interactive-result",
+      "kind": "paired-quantitative",
+      "synthetic": true,
+      "scope": [
+        "interactive workflows"
+      ],
+      "observed": {
+        "elapsedMs": 500,
+        "quality": 0.92
+      },
+      "candidateCriteria": {
+        "targetBelowMs": 1000,
+        "hardLimitAtMs": 10000,
+        "baseQualityAtLeast": 0.9,
+        "slowerQualityAtLeast": 0.97
+      },
+      "testPurpose": "speed and quality stay separate; conditional middle acceptance"
+    },
+    "service-access-1": {
+      "policyIdea": "service-access",
+      "kind": "request-success-ratio",
+      "synthetic": true,
+      "scope": [
+        "all request workflows"
+      ],
+      "observed": {
+        "successes": 999,
+        "attempts": 1000
+      },
+      "window": "fixed synthetic one-hour window",
+      "testPurpose": "do not call request success ratio elapsed-time uptime"
+    },
+    "peak-work-1": {
+      "policyIdea": "peak-work",
+      "kind": "capacity",
+      "synthetic": true,
+      "scope": [
+        "batch or reservation workflows"
+      ],
+      "observed": {
+        "offeredLoadRequestsPerSecond": 120,
+        "completedRequestsPerSecond": 100,
+        "p95ElapsedMs": 900,
+        "failedRequests": 0
+      },
+      "testPurpose": "capacity needs offered load and guardrails, not idle throughput"
+    },
+    "inclusive-use-1": {
+      "policyIdea": "inclusive-use",
+      "kind": "qualitative-conformance",
+      "synthetic": true,
+      "scope": [
+        "interactive workflows",
+        "review and approval workflows"
+      ],
+      "standard": "fictional keyboard-access checklist",
+      "version": "fixture-v1",
+      "method": "scripted fictional reviewer assessment; no accessibility audit performed",
+      "observed": null,
+      "testPurpose": "a nonnumeric condition; missing and failed assessment cannot pass"
+    },
+    "fresh-observation-1": {
+      "policyIdea": "fresh-observation",
+      "kind": "evidence-hygiene",
+      "synthetic": true,
+      "scope": [
+        "all policies"
+      ],
+      "observed": {
+        "freshness": "stale"
+      },
+      "testPurpose": "a stale observation stays unchecked, regardless of a passing stub"
+    },
+    "interactive-result-2": {
+      "policyIdea": "interactive-result",
+      "kind": "paired-quantitative",
+      "synthetic": true,
+      "scope": [
+        "interactive workflows"
+      ],
+      "observed": {
+        "elapsedMs": 2000,
+        "quality": 0.98
+      },
+      "candidateCriteria": {
+        "targetBelowMs": 1000,
+        "hardLimitAtMs": 10000,
+        "baseQualityAtLeast": 0.9,
+        "slowerQualityAtLeast": 0.97
+      },
+      "testPurpose": "speed and quality stay separate; conditional middle acceptance"
+    },
+    "inclusive-use-2": {
+      "policyIdea": "inclusive-use",
+      "kind": "qualitative-conformance",
+      "synthetic": true,
+      "scope": [
+        "interactive workflows",
+        "review and approval workflows"
+      ],
+      "standard": "fictional keyboard-access checklist",
+      "version": "fixture-v1",
+      "method": "scripted fictional reviewer assessment; no accessibility audit performed",
+      "observed": {
+        "conforms": false
+      },
+      "testPurpose": "a nonnumeric condition; missing and failed assessment cannot pass"
+    },
+    "inclusive-use-3": {
+      "policyIdea": "inclusive-use",
+      "kind": "qualitative-conformance",
+      "synthetic": true,
+      "scope": [
+        "interactive workflows",
+        "review and approval workflows"
+      ],
+      "standard": "fictional keyboard-access checklist",
+      "version": "fixture-v1",
+      "method": "scripted fictional reviewer assessment; no accessibility audit performed",
+      "observed": {
+        "conforms": true
+      },
+      "testPurpose": "a nonnumeric condition; missing and failed assessment cannot pass"
+    }
+  }
+}

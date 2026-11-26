@@ -1,0 +1,79 @@
+{
+  "title": "Channel muting decisions",
+  "intro": "Four things wait on you before channel muting can be built: one open question in the doc, the toggle copy, a limit, and one step only you can run. Each one says why it is asked, what waits on it and what happens if you leave it.",
+  "words": {
+    "badge": "The red number on the app icon that counts unread messages.",
+    "push": "A notification that shows on the phone's lock screen."
+  },
+  "items": [
+    {
+      "id": "examples/channel-muting.md#Q1",
+      "plain": "When a member mutes a channel, should its threads go quiet too?",
+      "why": "The doc says muting ships without thread-level muting, but its **How we'll know** signal says Ana gets zero notifications from the channel for a day. Thread replies notify today, so the doc as written can fail its own signal.",
+      "blocks": "§5 Mechanism (which notifier reads the mute table) and a fourth acceptance row, if threads are included. Phase 1 of the build can start either way.",
+      "ifNoAnswer": "The doc ships as written: threads keep notifying, and the signal is checked only in channels with no threads.",
+      "example": "Ana mutes #general at 09:00. At 11:00 Ben replies in a thread Ana started last week. With threads muted, Ana gets nothing. Without, she gets a push from a channel she muted.",
+      "evidence": [
+        {"ref": "examples/channel-muting.md:20", "note": "the signal: zero notifications from the channel for a day"},
+        {"ref": "examples/channel-muting.md:68", "note": "every channel member is notified on every message (`messages.ts:88`); thread replies take the same path"},
+        {"ref": "examples/channel-muting.md:102", "note": "the question as the doc asks it"}
+      ],
+      "options": [
+        {
+          "label": "Muting a channel also mutes its threads",
+          "recommended": true,
+          "because": "it is the only answer under which the doc's own signal holds for every channel.",
+          "commits": "one mute check read by both the channel and the thread notifier; no per-thread mute in this doc.",
+          "think": "a member who follows one thread closely loses it until they unmute the whole channel.",
+          "then": "the agent adds an acceptance row to §6 (AT-4: a thread reply in a muted channel sends nothing), cites the thread send path in §5, and moves the question to §8 as a decision."
+        },
+        {
+          "label": "Threads keep notifying; thread muting is a later doc",
+          "because": "the doc as written: it ships without thread-level muting.",
+          "commits": "a follow-up doc for thread muting, and a narrower signal in §0.",
+          "think": "the signal fails for any channel with active threads, so §0 needs your edit before the doc can move on.",
+          "then": "the agent opens a thread-muting doc as a thin draft and shows you the §0 line the signal would need."
+        }
+      ]
+    },
+    {
+      "id": "copy-review",
+      "kind": "approve",
+      "group": "Other decisions",
+      "text": "Approve the settings copy for the mute toggle",
+      "why": "The toggle is the only place a member learns what muting does. The doc's first rule (no push and no badge from a muted channel) means the copy has to say both.",
+      "blocks": "The settings screen in build phase 1.",
+      "ifNoAnswer": "Phase 1 ships with the old label, which says nothing about badges.",
+      "evidence": [
+        {"ref": "examples/channel-muting.md:18", "note": "rule 1: no push or badge count until unmuted"}
+      ],
+      "code": "- Turn off notifications\n+ Mute channel\n+ You won't get pushes or badges from this channel until you unmute it."
+    },
+    {
+      "id": "mute-limit",
+      "kind": "input",
+      "group": "Other decisions",
+      "inputType": "number",
+      "text": "How many channels may one member mute?",
+      "why": "The send path reads the mute table before every notification. With no limit, one member with thousands of muted channels makes every send slower for everyone.",
+      "blocks": "The schema in build phase 1 (the index on the mute table).",
+      "ifNoAnswer": "No limit is set; the agent flags it as UNENFORCED in §4.",
+      "example": "Ben is in 800 channels and mutes 600 of them. At 500 he is told he has reached the limit and must unmute one first.",
+      "evidence": [
+        {"ref": "examples/channel-muting.md:69", "note": "the send path checks the mute table before writing a notification"}
+      ],
+      "proposed": 500
+    },
+    {
+      "id": "staging-flag",
+      "kind": "confirm",
+      "group": "Other decisions",
+      "text": "Turn the mute flag on in staging",
+      "why": "The red tests in phase 1 run against staging, and they fail for the wrong reason while the flag is off.",
+      "blocks": "Arming the doc: the red gate commit needs staging with the flag on.",
+      "ifNoAnswer": "The agent waits. It cannot turn the flag on: that needs your staging credentials.",
+      "code": "./scripts/flags.sh set channel-mute on --env staging",
+      "doneLabel": "I turned it on"
+    }
+  ]
+}

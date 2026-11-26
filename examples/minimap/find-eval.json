@@ -1,0 +1,33 @@
+{
+  "$comment": "Real work-item titles (pull requests and issues) linked to the one row each is about, in the engineer's words, not the map's. Never put a row's asks here: that tests the map against its own memory. `python3 capability_find.py --eval` scores find against it.",
+  "cases": [
+    {
+      "text": "fix(notify): muted channel still sends a push",
+      "row": "CAP-1"
+    },
+    {
+      "text": "Unmute does not bring notifications back",
+      "row": "CAP-1"
+    },
+    {
+      "text": "Badge count keeps going up in a muted room",
+      "row": "CAP-1"
+    },
+    {
+      "text": "Muting hides the channel for other members too",
+      "row": "CAP-1"
+    },
+    {
+      "text": "Ben stops getting pushes after Ana mutes",
+      "row": "CAP-1"
+    },
+    {
+      "text": "feat(sidebar): show a muted marker in the list",
+      "row": "CAP-3"
+    },
+    {
+      "text": "No way to tell which channels I muted",
+      "row": "CAP-3"
+    }
+  ]
+}

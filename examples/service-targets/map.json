@@ -1,0 +1,227 @@
+{
+  "version": 1,
+  "docRoot": ".",
+  "servicePolicies": [
+    {
+      "id": "interactive-search",
+      "kind": "quantitative",
+      "revision": "1",
+      "boundary": "submit to complete visible results",
+      "workload": "10000 notes, 20 concurrent signed-in users",
+      "metric": "duration",
+      "unit": "ms",
+      "direction": "lower",
+      "aggregation": "each-sample",
+      "target": 1000,
+      "unacceptable": 10000,
+      "windowSeconds": 3600,
+      "minSamples": 2,
+      "maxAgeSeconds": 300,
+      "guardrails": [
+        {
+          "metric": "duration",
+          "unit": "ms",
+          "operator": "at-least",
+          "value": 0
+        },
+        {
+          "metric": "relevance",
+          "unit": "score",
+          "operator": "at-least",
+          "value": 0.8
+        },
+        {
+          "metric": "relevance",
+          "unit": "score",
+          "operator": "at-most",
+          "value": 1
+        },
+        {
+          "metric": "correct",
+          "unit": "boolean",
+          "operator": "at-least",
+          "value": 1
+        },
+        {
+          "metric": "correct",
+          "unit": "boolean",
+          "operator": "at-most",
+          "value": 1
+        }
+      ],
+      "acceptableWhen": [
+        {
+          "metric": "relevance",
+          "unit": "score",
+          "operator": "at-least",
+          "value": 0.95
+        }
+      ]
+    },
+    {
+      "id": "request-availability",
+      "kind": "quantitative",
+      "revision": "1",
+      "boundary": "all completed or timed-out requests at the public API",
+      "workload": "10000 notes, 20 concurrent signed-in users",
+      "metric": "request-success",
+      "unit": "%",
+      "direction": "higher",
+      "aggregation": "request-success-ratio",
+      "target": 99.9,
+      "unacceptable": 99,
+      "windowSeconds": 3600,
+      "minSamples": 2,
+      "maxAgeSeconds": 300,
+      "guardrails": [],
+      "acceptableWhen": []
+    },
+    {
+      "id": "loaded-throughput",
+      "kind": "quantitative",
+      "revision": "1",
+      "boundary": "completed requests per second in each 60-second interval",
+      "workload": "open-loop offered load of at least 120 requests/s, 10000 records",
+      "metric": "completed-throughput",
+      "unit": "requests/s",
+      "direction": "higher",
+      "aggregation": "each-sample",
+      "target": 100,
+      "unacceptable": 80,
+      "windowSeconds": 3600,
+      "minSamples": 2,
+      "maxAgeSeconds": 300,
+      "guardrails": [
+        {
+          "metric": "offered-load",
+          "unit": "requests/s",
+          "operator": "at-least",
+          "value": 120
+        },
+        {
+          "metric": "p95-duration",
+          "unit": "ms",
+          "operator": "at-most",
+          "value": 1000
+        }
+      ],
+      "acceptableWhen": []
+    },
+    {
+      "id": "accessible-interface",
+      "kind": "assessment",
+      "revision": "1",
+      "basis": "The applicable WCAG AA success criteria for the named journeys.",
+      "standard": {
+        "name": "WCAG",
+        "version": "2.2 AA"
+      },
+      "scope": "search and checkout journeys, desktop and mobile, build example-1",
+      "method": "automated scan plus keyboard and screen-reader assessment",
+      "criteria": {
+        "target": "All applicable AA criteria pass in scope.",
+        "unacceptable": "Any applicable AA criterion fails in scope."
+      },
+      "maxAgeSeconds": 86400
+    }
+  ],
+  "rows": [
+    {
+      "id": "CAP-1",
+      "title": "search for useful results without an unacceptable wait",
+      "story": "A member can search for useful results without an unacceptable wait.",
+      "doc": null,
+      "scenarios": [
+        {
+          "id": "CAP-1.1",
+          "at": null,
+          "given": "Ana has access to the example service",
+          "when": "she submits a search",
+          "then": "she sees relevant results",
+          "altitude": "perception"
+        }
+      ],
+      "tests": [],
+      "e2eTests": [],
+      "evalTests": [],
+      "siblingTests": [],
+      "verdict": "not-built",
+      "servicePolicyRefs": [
+        "interactive-search",
+        "accessible-interface"
+      ]
+    },
+    {
+      "id": "CAP-2",
+      "title": "make requests to an available API",
+      "story": "A member can make requests to an available API.",
+      "doc": null,
+      "scenarios": [
+        {
+          "id": "CAP-2.1",
+          "at": null,
+          "given": "Ana has access to the example service",
+          "when": "she calls the API",
+          "then": "she receives a successful response",
+          "altitude": "response"
+        }
+      ],
+      "tests": [],
+      "e2eTests": [],
+      "evalTests": [],
+      "siblingTests": [],
+      "verdict": "not-built",
+      "servicePolicyRefs": [
+        "request-availability"
+      ]
+    },
+    {
+      "id": "CAP-3",
+      "title": "serve requests under the agreed offered load",
+      "story": "A member can serve requests under the agreed offered load.",
+      "doc": null,
+      "scenarios": [
+        {
+          "id": "CAP-3.1",
+          "at": null,
+          "given": "Ana has access to the example service",
+          "when": "clients send traffic under load",
+          "then": "requests complete",
+          "altitude": "response"
+        }
+      ],
+      "tests": [],
+      "e2eTests": [],
+      "evalTests": [],
+      "siblingTests": [],
+      "verdict": "not-built",
+      "servicePolicyRefs": [
+        "loaded-throughput"
+      ]
+    },
+    {
+      "id": "CAP-4",
+      "title": "complete checkout through an accessible journey",
+      "story": "A member can complete checkout through an accessible journey.",
+      "doc": null,
+      "scenarios": [
+        {
+          "id": "CAP-4.1",
+          "at": null,
+          "given": "Ana has access to the example service",
+          "when": "she checks out",
+          "then": "she can complete checkout",
+          "altitude": "perception"
+        }
+      ],
+      "tests": [],
+      "e2eTests": [],
+      "evalTests": [],
+      "siblingTests": [],
+      "verdict": "not-built",
+      "servicePolicyRefs": [
+        "accessible-interface"
+      ]
+    }
+  ]
+}

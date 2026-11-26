@@ -1,0 +1,30 @@
+{
+  "description": "promise: draw the decision pane (a mod: decisions-pane.js); block the model's edits to §0 of an agreed outcome doc, and lint an issue or pull request body before it is posted",
+  "modules": [
+    "./decisions-pane.js"
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/guard_section0.py\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*github.*__(create_pull_request|update_pull_request|issue_write|create_issue|update_issue)|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/guard_github_text.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

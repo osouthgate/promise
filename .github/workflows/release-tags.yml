@@ -1,0 +1,36 @@
+name: release tags
+
+# Each release on main gets a tag, v<version> from .claude-plugin/plugin.json, on the
+# commit that first names it; the major tag (v1) moves to the newest release; and the
+# release gets a GitHub release whose notes are its CHANGELOG entry
+# (.github/scripts/release.sh, which a maintainer runs by hand when Actions cannot). A repository pins promise to that tag (the marketplace's
+# source.ref in .claude/settings.json), the Action is used as osouthgate/promise@v1,
+# and pre-commit's rev names a tag: none of them can name a bare commit.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-tags
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag the release, move v1, publish the GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          bash .github/scripts/release.sh

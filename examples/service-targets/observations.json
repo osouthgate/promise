@@ -1,0 +1,135 @@
+{
+  "observations": [
+    {
+      "row": "CAP-1",
+      "target": "interactive-search",
+      "revision": "1",
+      "boundary": "submit to complete visible results",
+      "workload": "10000 notes, 20 concurrent signed-in users",
+      "units": {
+        "duration": "ms",
+        "relevance": "score",
+        "correct": "boolean"
+      },
+      "source": "illustrative collector export",
+      "windowStart": "2026-11-04T11:00:00Z",
+      "windowEnd": "2026-11-04T12:00:00Z",
+      "samples": [
+        {
+          "id": "sample-0",
+          "at": "2026-11-04T11:30:00Z",
+          "values": {
+            "duration": 800,
+            "relevance": 0.8,
+            "correct": 1
+          }
+        },
+        {
+          "id": "sample-1",
+          "at": "2026-11-04T11:30:00Z",
+          "values": {
+            "duration": 5000,
+            "relevance": 1,
+            "correct": 1
+          }
+        }
+      ]
+    },
+    {
+      "row": "CAP-2",
+      "target": "request-availability",
+      "revision": "1",
+      "boundary": "all completed or timed-out requests at the public API",
+      "workload": "10000 notes, 20 concurrent signed-in users",
+      "units": {
+        "request-success": "%"
+      },
+      "source": "illustrative collector export",
+      "windowStart": "2026-11-04T11:00:00Z",
+      "windowEnd": "2026-11-04T12:00:00Z",
+      "samples": [
+        {
+          "id": "sample-0",
+          "at": "2026-11-04T11:30:00Z",
+          "values": {},
+          "successful": true
+        },
+        {
+          "id": "sample-1",
+          "at": "2026-11-04T11:30:00Z",
+          "values": {},
+          "successful": true
+        }
+      ]
+    },
+    {
+      "row": "CAP-3",
+      "target": "loaded-throughput",
+      "revision": "1",
+      "boundary": "completed requests per second in each 60-second interval",
+      "workload": "open-loop offered load of at least 120 requests/s, 10000 records",
+      "units": {
+        "completed-throughput": "requests/s",
+        "offered-load": "requests/s",
+        "p95-duration": "ms"
+      },
+      "source": "illustrative collector export",
+      "windowStart": "2026-11-04T11:00:00Z",
+      "windowEnd": "2026-11-04T12:00:00Z",
+      "samples": [
+        {
+          "id": "sample-0",
+          "at": "2026-11-04T11:30:00Z",
+          "values": {
+            "completed-throughput": 90,
+            "offered-load": 120,
+            "p95-duration": 900
+          }
+        },
+        {
+          "id": "sample-1",
+          "at": "2026-11-04T11:30:00Z",
+          "values": {
+            "completed-throughput": 100,
+            "offered-load": 120,
+            "p95-duration": 900
+          }
+        }
+      ]
+    },
+    {
+      "row": "CAP-1",
+      "target": "accessible-interface",
+      "revision": "1",
+      "scope": "search and checkout journeys, desktop and mobile, build example-1",
+      "method": "automated scan plus keyboard and screen-reader assessment",
+      "assessor": "Example audit team",
+      "rationale": "The cited assessment checked every applicable criterion within scope.",
+      "band": "target",
+      "observedAt": "2026-11-04T12:00:00Z",
+      "evidence": [
+        {
+          "ref": "audit/example-1",
+          "description": "Illustrative manual and automated assessment, not a real audit."
+        }
+      ]
+    },
+    {
+      "row": "CAP-4",
+      "target": "accessible-interface",
+      "revision": "1",
+      "scope": "search and checkout journeys, desktop and mobile, build example-1",
+      "method": "automated scan plus keyboard and screen-reader assessment",
+      "assessor": "Example audit team",
+      "rationale": "The cited assessment checked every applicable criterion within scope.",
+      "band": "target",
+      "observedAt": "2026-11-04T12:00:00Z",
+      "evidence": [
+        {
+          "ref": "audit/example-1",
+          "description": "Illustrative manual and automated assessment, not a real audit."
+        }
+      ]
+    }
+  ]
+}

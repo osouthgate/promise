@@ -1,0 +1,7 @@
+student_id,student_name,teacher_id,subject,grade,report
+SYN-001,Alex Example,T-SYN-A,English,B,"Alex has made excellant progress this term."
+SYN-002,Blair Example,T-SYN-A,English,A,"Blair have shown strong improvement in written work."
+SYN-003,Casey Example,T-SYN-B,Science,C,"A diligent learner who always completes extension work independently."
+SYN-004,Drew Example,T-SYN-B,Science,C,"A diligent learner who always completes extension work independently."
+SYN-005,Ellis Example,T-SYN-A,English,INVALID,"Ellis contributes thoughtfully to discussion."
+SYN-006,Finley Example,T-SYN-B,Science,B,"Finley contributes thoughtfully to discussion."

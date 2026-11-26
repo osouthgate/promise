@@ -1,0 +1,1 @@
+{"version": 1, "rows": [{"id": "C-1"}, {"id": "C-2", "feature": "reports"}, {"id": "C-3", "feature": "reports"}, {"id": "C-4"}], "features": [{"id": "reports", "name": "Reports", "plain": "The reports a client reads and downloads."}], "glossary": [{"term": "Export", "plain": "Download a report as a file.", "aliases": ["exports", "exported"]}]}

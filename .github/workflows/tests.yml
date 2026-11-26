@@ -1,0 +1,36 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run the promise test suite
+        run: python3 -m unittest discover -s tests -v
+
+  mod:
+    # hooks/decisions-pane.js: the manifest and module as Claude Code reads them, and the
+    # mod's own tests (tests/mods/). Neither needs a sign-in or the network beyond install.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Validate the plugin and its mod
+        run: claude plugin validate --strict .claude-plugin/plugin.json
+      - name: Run the mod's tests
+        run: claude plugin test

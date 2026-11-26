@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="playwright" tests="2" failures="0">
+  <testsuite name="mute.spec.ts" file="tests/e2e/mute.spec.ts" tests="1">
+    <testcase classname="mute.spec.ts" name="no badge after mute" time="2.1"/>
+  </testsuite>
+  <testsuite name="share.spec.ts" file="tests/e2e/share.spec.ts" tests="1">
+    <testcase classname="share.spec.ts" name="reader sees no edit control" time="1.8"/>
+  </testsuite>
+</testsuites>

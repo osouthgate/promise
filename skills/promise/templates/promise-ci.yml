@@ -1,0 +1,29 @@
+# promise: lint the outcome docs, and fail a pull request that changes §0 of
+# an agreed doc without setting it back to draft, or that holds a shipped doc
+# with a §6 line no red run or Kill line covers, citing a row that is not a
+# proven backfilled row (check.py's gate step), or that says "Size: tiny" in its body but
+# changes a promise, §0 or §6, a migration or a protected path
+# (changed_rows.py). Written by /promise adopt.
+# With no docs-home input, the Action lints the folder the project's promise
+# config names (docsHome), the same folder a local check.py run reads.
+# Keep the trigger `pull_request`: the gate step runs the project's map.row
+# command from the checked-out tree, so `pull_request_target` with the pull
+# request's head checked out would run a fork's command with this
+# repository's secrets.
+name: promise
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]  # edited: a new Size: line is checked again
+
+jobs:
+  promise:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # the map check reads both sides of the pull request's merge
+      - uses: osouthgate/promise@v1
+        with:
+          map-checks: "true"  # the map's own checks, and a row a merge lost
+          tiny-check: "true"  # a body that says "Size: tiny" is checked against the diff

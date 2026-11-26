@@ -1,0 +1,41 @@
+{
+  "title": "Start with one useful promise",
+  "intro": "Choose where you are starting, then describe the first useful result. You can leave anything uncertain for the conversation.",
+  "items": [
+    {
+      "id": "starting-point",
+      "kind": "question",
+      "group": "Your first workflow",
+      "text": "Where are you starting?",
+      "why": "Your starting point determines whether we explore an idea, preview setup, or inspect an existing workflow.",
+      "blocks": "Choosing the next action.",
+      "ifNoAnswer": "We can work it out in conversation.",
+      "options": [
+        {"label": "An idea before code", "because": "You want to decide what should work before building.", "then": "Explore one user job and a concrete success example."},
+        {"label": "A new project", "because": "You want to choose a first workflow and the setup it needs.", "then": "Preview the smallest setup and draft the selected outcome."},
+        {"label": "An established product", "because": "There is existing behaviour to understand and improve.", "then": "Choose one feature to inspect, using user impact and recurring problems."},
+        {"label": "Already using Promise", "because": "Existing outcomes and evidence may already cover this job.", "then": "Find the current capability and preview the smallest useful change."}
+      ]
+    },
+    {
+      "id": "first-workflow",
+      "kind": "question",
+      "group": "Your first workflow",
+      "text": "Who needs to do what first, and why does it matter now?",
+      "why": "This gives the first promise a useful boundary and keeps the discussion focused.",
+      "blocks": "Selecting the first workflow.",
+      "ifNoAnswer": "We will explore a couple of possible workflows before choosing.",
+      "example": "A head of year reviews a batch of teacher reports so that corrections reach the right teacher."
+    },
+    {
+      "id": "success-example",
+      "kind": "question",
+      "group": "Your first workflow",
+      "text": "What is one concrete example that would show this worked?",
+      "why": "A visible result helps decide what evidence the first promise needs.",
+      "blocks": "Choosing how to check the outcome.",
+      "ifNoAnswer": "The success check stays open while we refine the workflow.",
+      "example": "Given two teachers' reports, each teacher receives only the feedback intended for them."
+    }
+  ]
+}

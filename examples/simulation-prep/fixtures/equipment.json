@@ -1,0 +1,13 @@
+{
+  "synthetic": true,
+  "equipment": [
+    {"id": "EQ-SYN-1", "site": "North", "kind": "drill", "restricted": false, "state": "available"},
+    {"id": "EQ-SYN-2", "site": "North", "kind": "saw", "restricted": true, "state": "available"},
+    {"id": "EQ-SYN-3", "site": "South", "kind": "sander", "restricted": false, "state": "quarantined"}
+  ],
+  "attempts": [
+    {"member": "MEM-SYN-A", "equipment": "EQ-SYN-1", "slot": "2030-01-07 morning", "attempt": "A"},
+    {"member": "MEM-SYN-B", "equipment": "EQ-SYN-1", "slot": "2030-01-07 morning", "attempt": "B"}
+  ],
+  "notice": "Seed descriptions only; no reservation logic executes."
+}

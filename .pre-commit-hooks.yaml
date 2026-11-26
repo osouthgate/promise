@@ -1,0 +1,17 @@
+# promise hooks for the pre-commit framework (https://pre-commit.com).
+# In your project's .pre-commit-config.yaml:
+#   - repo: https://github.com/osouthgate/promise
+#     rev: v1.44.1
+#     hooks:
+#       - id: promise-section0
+#       - id: promise-lint
+- id: promise-section0
+  name: "promise: §0 of agreed docs changes only with the human"
+  entry: hooks/precommit.py section0
+  language: script
+  files: \.md$
+- id: promise-lint
+  name: "promise: outcome-doc shape"
+  entry: hooks/precommit.py lint
+  language: script
+  files: \.md$

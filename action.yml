@@ -1,0 +1,95 @@
+name: promise
+description: Lint outcome docs, fail when §0 of an agreed doc changed without going back to draft, and fail a shipped doc with a line no red run, kill or proven row covers.
+author: Oliver Southgate
+branding:
+  icon: check-square
+  color: green
+
+inputs:
+  docs-home:
+    description: The folder that holds the outcome docs. Empty (the default) reads docsHome from the project's promise config, as check.py does when run locally with no flag.
+    required: false
+    default: ""
+  base-ref:
+    description: The git ref to compare §0 against. Default on a pull request is its base branch; elsewhere the §0 check is skipped.
+    required: false
+    default: ""
+  lint:
+    description: Set to "false" to skip the shape lint. The §0 check and the red-gate check still run.
+    required: false
+    default: "true"
+  map-checks:
+    description: Set to "true" to also run the map's own checks (map.checks, such as the starter reader's --check, which on a pull request's merge also finds a row the merge lost). Check out full history (fetch-depth 0) for that part. Off by default, so a workflow whose checks need a tool this job lacks keeps passing; the workflow adopt writes turns it on.
+    required: false
+    default: "false"
+  tiny-check:
+    description: Set to "true" to also check a pull request whose body says "Size: tiny" against its diff (changed_rows.py --body; references/sizing.md) — it fails when the change touches a row's scenarios, a doc's §0 or §6, a migration or schema file, or a path the config's protectedPaths lists, as read at the merge base. Needs the merge base, so check out full history (fetch-depth 0). Off by default; the workflow adopt writes turns it on.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: promise checks
+      shell: bash
+      env:
+        DOCS_HOME: ${{ inputs.docs-home }}
+        BASE_REF: ${{ inputs.base-ref }}
+        RUN_LINT: ${{ inputs.lint }}
+        RUN_MAP_CHECKS: ${{ inputs.map-checks }}
+        RUN_TINY_CHECK: ${{ inputs.tiny-check }}
+        SCRIPTS: ${{ github.action_path }}/skills/promise/scripts
+      run: |
+        set -euo pipefail
+        # The checks themselves live in check.py, so a team that cannot run
+        # this Action runs the same thing locally. Here: lint the folder,
+        # check §0 against the pull request's base when there is one, and
+        # check each shipped doc's lines no red run or kill covers against the map
+        # (check.py's gate step, which --no-map does not skip; it runs
+        # map.row, so a map reader that needs a toolchain needs it here).
+        # map.row is the project's own command, read from the checked-out
+        # tree: run this Action on `pull_request`, never on
+        # `pull_request_target` with the pull request's head checked out,
+        # or a pull request from a fork runs a command it wrote with this
+        # repository's token and secrets.
+        # The map step is left to check.py runs that have a test run to join;
+        # the map's own checks (map.checks, the same trust as map.row) need none.
+        args=(--no-map)
+        if [ "${RUN_MAP_CHECKS:-false}" = "true" ]; then
+          args+=(--map-checks)
+        fi
+        if [ -n "$DOCS_HOME" ]; then
+          args+=(--docs-home "$DOCS_HOME")
+        fi
+        if [ "$RUN_LINT" = "false" ]; then
+          args+=(--no-lint)
+        fi
+        base="$BASE_REF"
+        if [ -z "$base" ] && [ -n "${GITHUB_BASE_REF:-}" ] && { [ -z "$DOCS_HOME" ] || [ -d "$DOCS_HOME" ]; }; then
+          # --depth=1 only on a clone that is already shallow: on a full one it would cut the
+          # history the map check needs to find the merge base
+          depth=()
+          if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then depth=(--depth=1); fi
+          git fetch --no-tags --quiet ${depth[@]+"${depth[@]}"} origin "+refs/heads/$GITHUB_BASE_REF:refs/remotes/origin/$GITHUB_BASE_REF"
+          base="origin/$GITHUB_BASE_REF"
+        fi
+        if [ -n "$base" ]; then
+          args+=(--base "$base")
+        fi
+        python3 "$SCRIPTS/check.py" "${args[@]}"
+        # A pull request body whose Size: line says tiny is checked against the
+        # diff: changed_rows.py exits 1 when the change touches what tiny may not.
+        if [ "${RUN_TINY_CHECK:-false}" = "true" ] && [ -n "$base" ] && [ -f "${GITHUB_EVENT_PATH:-}" ]; then
+          body="$(mktemp)"
+          python3 -c 'import json, sys; pr = json.load(open(sys.argv[1], encoding="utf-8")).get("pull_request") or {}; sys.stdout.write(pr.get("body") or "")' "$GITHUB_EVENT_PATH" > "$body"
+          # Only a pull request that claims tiny is checked, so a setup problem never
+          # fails one sized small, capability or risky.
+          claims_tiny="$(python3 -c 'import sys; sys.path.insert(0, sys.argv[1]); import lint_github_text as l; print("yes" if any(w == "tiny" for _n, w in l.size_lines(open(sys.argv[2], encoding="utf-8").read())) else "no")' "$SCRIPTS" "$body")"
+          if [ "$claims_tiny" = "yes" ]; then
+            tiny=(--base "$base" --head HEAD --body "$body")
+            if [ -n "$DOCS_HOME" ]; then
+              tiny+=(--docs-home "$DOCS_HOME")
+            fi
+            python3 "$SCRIPTS/changed_rows.py" "${tiny[@]}"
+          fi
+        fi

@@ -1,0 +1,18 @@
+{
+  "name": "promise",
+  "owner": {
+    "name": "Oliver Southgate",
+    "url": "https://github.com/osouthgate"
+  },
+  "metadata": {
+    "description": "promise: write the promise before the build, then prove it kept.",
+    "version": "1.44.1"
+  },
+  "plugins": [
+    {
+      "name": "promise",
+      "source": "./",
+      "description": "Write the promise before the build, then prove it kept. You write the outcome and rules in your own words, the model may argue in notes but never rewrite them, a linter checks the doc, and your acceptance rows are committed as failing tests before any code is written."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="vitest tests" tests="7" failures="1" errors="0" time="1.9">
+  <testsuite name="tests/unit/mute.test.ts" file="tests/unit/mute.test.ts" tests="1" failures="0">
+    <testcase classname="tests/unit/mute.test.ts" name="stores mute per member" time="0.01"/>
+  </testsuite>
+  <testsuite name="tests/unit/search.test.ts" file="tests/unit/search.test.ts" tests="2" failures="0">
+    <testcase classname="tests/unit/search.test.ts" name="ranks by recency" time="0.02"/>
+    <testcase classname="tests/unit/search.test.ts" name="returns every match" time="0.01"/>
+  </testsuite>
+  <testsuite name="tests/api/export.test.ts" file="tests/api/export.test.ts" tests="1" failures="1">
+    <testcase classname="tests/api/export.test.ts" name="keeps tables" time="0.05">
+      <failure message="expected '| a | b |' in output">AssertionError: expected '| a | b |' in output</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="tests/unit/summary.test.ts" file="tests/unit/summary.test.ts" tests="1" failures="0">
+    <testcase classname="tests/unit/summary.test.ts" name="returns text under 200 words" time="0.01"/>
+  </testsuite>
+  <testsuite name="evals/summary.eval.ts" file="evals/summary.eval.ts" tests="1" failures="0">
+    <testcase classname="evals/summary.eval.ts" name="names every decision" time="4.20"/>
+  </testsuite>
+</testsuites>

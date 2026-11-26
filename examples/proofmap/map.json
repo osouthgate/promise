@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "$comment": "An example capability map for a small notes app, with a JUnit run beside it (run/). Six rows, one per thing map_report.py can tell you: proven, green but under-proven, failing, never ran, promotable, and a map that claims more than the run shows. Illustrative, not a real product.",
+  "docRoot": ".",
+  "rows": [
+    {
+      "id": "CAP-1",
+      "story": "A member mutes a channel so it stops notifying them, and unmutes it to resume.",
+      "priority": "must",
+      "doc": null,
+      "scenarios": [
+        {
+          "id": "CAP-1.1",
+          "at": null,
+          "given": "Ana is in a channel",
+          "when": "she mutes it",
+          "then": "the channel is stored as muted for Ana only",
+          "altitude": "data"
+        },
+        {
+          "id": "CAP-1.2",
+          "at": null,
+          "given": "Ana has muted a channel",
+          "when": "a message arrives in it",
+          "then": "she sees no notification badge",
+          "altitude": "perception"
+        }
+      ],
+      "tests": [
+        "tests/unit/mute.test.ts::stores mute per member"
+      ],
+      "e2eTests": [
+        "tests/e2e/mute.spec.ts::no badge after mute"
+      ],
+      "evalTests": [],
+      "siblingTests": [],
+      "verdict": "proven"
+    },
+    {
+      "id": "CAP-2",
+      "story": "A member searches their notes and sees the best match first.",
+      "priority": "must",
+      "doc": null,
+      "scenarios": [
+        {
+          "id": "CAP-2.1",
+          "at": null,
+          "given": "Ben has three notes about invoices",
+          "when": "he searches 'invoice'",
+          "then": "he sees the most recent invoice note at the top of the list",
+          "altitude": "perception"
+        }
+      ],
+      "tests": [
+        "tests/unit/search.test.ts::ranks by recency",
+        "tests/unit/search.test.ts::returns every match"
+      ],
+      "e2eTests": [],
+      "evalTests": [],
+      "siblingTests": [],
+      "verdict": "proven"
+    },
+    {
+      "id": "CAP-3",
+      "story": "A member exports a note as Markdown.",
+      "priority": "should",
+      "doc": null,
+      "scenarios": [
+        {
+          "id": "CAP-3.1",
+          "at": null,
+          "given": "Cara has a note with a table",
+          "when": "she exports it",
+          "then": "the file she downloads keeps the table as Markdown",
+          "altitude": "response"
+        }
+      ],
+      "tests": [
+        "tests/api/export.test.ts::keeps tables"
+      ],
+      "e2eTests": [],
+      "evalTests": [],
+      "siblingTests": [],
+      "verdict": "under-proven"
+    },
+    {
+      "id": "CAP-4",
+      "story": "A member shares a note with a teammate, who can read but not edit it.",
+      "priority": "must",
+      "doc": null,
+      "scenarios": [
+        {
+          "id": "CAP-4.1",
+          "at": null,
+          "given": "Dev shares a note with Eve as a reader",
+          "when": "Eve opens it",
+          "then": "Eve can read it and has no edit control",
+          "altitude": "perception"
+        }
+      ],
+      "tests": [],
+      "e2eTests": [
+        "tests/e2e/share.spec.ts::reader has no edit button"
+      ],
+      "evalTests": [],
+      "siblingTests": [],
+      "verdict": "under-proven"
+    },
+    {
+      "id": "CAP-5",
+      "story": "The assistant summarises a long note and names every decision in it.",
+      "priority": "should",
+      "doc": null,
+      "scenarios": [
+        {
+          "id": "CAP-5.1",
+          "at": null,
+          "given": "a note records three decisions",
+          "when": "Fay asks for a summary",
+          "then": "the summary names all three decisions",
+          "altitude": "judgement"
+        }
+      ],
+      "tests": [
+        "tests/unit/summary.test.ts::returns text under 200 words"
+      ],
+      "e2eTests": [],
+      "evalTests": [
+        "evals/summary.eval.ts::names every decision"
+      ],
+      "siblingTests": [],
+      "verdict": "under-proven"
+    },
+    {
+      "id": "CAP-6",
+      "story": "Deleted notes stay recoverable for 30 days.",
+      "priority": "must",
+      "doc": null,
+      "scenarios": [
+        {
+          "id": "CAP-6.1",
+          "at": null,
+          "given": "Gus deletes a note",
+          "when": "he opens Trash 29 days later",
+          "then": "the note is there and he can restore it",
+          "altitude": "perception"
+        }
+      ],
+      "tests": [],
+      "e2eTests": [],
+      "evalTests": [],
+      "siblingTests": [],
+      "verdict": "proven"
+    }
+  ]
+}

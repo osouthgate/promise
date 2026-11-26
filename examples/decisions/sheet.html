@@ -1,0 +1,589 @@
+<title>Channel muting decisions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --paper: #f4f5f7; --surface: #ffffff; --ink: #1b2330; --muted: #5a6574; --line: #dce0e6;
+  --accent: #1f6b74; --accent-ink: #ffffff; --accent-soft: #e3eff0;
+  --block: #a8431c; --block-soft: #f7e7df; --ok: #2c7a4b; --ok-soft: #e2f1e7; --warn: #8a6a12;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #12161c; --surface: #1a2029; --ink: #e5e8ed; --muted: #9aa4b1; --line: #2b333e;
+    --accent: #5fb0b9; --accent-ink: #0d1a1c; --accent-soft: #1d3236;
+    --block: #e38a64; --block-soft: #3a241b; --ok: #6cc28f; --ok-soft: #1c3226; --warn: #d9b85a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #12161c; --surface: #1a2029; --ink: #e5e8ed; --muted: #9aa4b1; --line: #2b333e;
+  --accent: #5fb0b9; --accent-ink: #0d1a1c; --accent-soft: #1d3236;
+  --block: #e38a64; --block-soft: #3a241b; --ok: #6cc28f; --ok-soft: #1c3226; --warn: #d9b85a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.55 var(--sans); padding-inline: 16px; }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 28px 120px; display: grid; gap: 28px; }
+header { display: grid; gap: 10px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-size: 28px; line-height: 1.2; font-weight: 600; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 65ch; }
+.progress { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+.bar { flex: 1 1 200px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+.group { display: grid; gap: 12px; }
+.group-head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.group-head h2 { margin: 0; font-size: 17px; font-weight: 600; }
+.group-head .path { font: 13px var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+.item { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 12px; border-left: 4px solid var(--line); }
+.item.blocking { border-left-color: var(--block); }
+.item.done { border-left-color: var(--ok); }
+.item-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.qid { font: 500 13px var(--mono); }
+.tag { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: var(--paper); color: var(--muted); }
+.tag.blocking { background: var(--block-soft); color: var(--block); }
+.tag.done { background: var(--ok-soft); color: var(--ok); }
+.tag.rec { background: var(--accent-soft); color: var(--accent); }
+.owner { font-size: 13px; color: var(--muted); }
+.text { margin: 0; font-weight: 500; max-width: 70ch; }
+.later { margin: 0; font-size: 14px; color: var(--muted); }
+button.term { all: unset; cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; }
+button.term:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+dialog.help { max-width: min(420px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: var(--surface); color: var(--ink); }
+dialog.help::backdrop { background: rgba(0, 0, 0, .35); }
+dialog.help h3 { margin: 0 0 6px; font-size: 16px; }
+dialog.help p { margin: 0 0 12px; }
+.detail { color: var(--ink); max-width: 70ch; display: grid; gap: 8px; font-size: 14px; }
+.detail p, .detail ul { margin: 0; }
+.detail ul { padding-left: 20px; }
+code { font: 13px var(--mono); background: var(--paper); padding: 1px 4px; border-radius: 3px; overflow-wrap: anywhere; }
+pre { margin: 0; font: 13px/1.5 var(--mono); background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; }
+figure { margin: 0; overflow-x: auto; }
+figure img { max-width: 100%; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+a { color: var(--accent); }
+.evidence { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.promise { background: var(--accent-soft); border-radius: 8px; padding: 12px 16px; display: grid; gap: 6px; font-size: 14px; max-width: 100%; }
+.promise p, .promise ul { margin: 0; }
+.promise ul { padding-left: 20px; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.small-check { font-size: 13px; font-weight: 400; color: var(--muted); }
+.small-check input { width: 16px; height: 16px; accent-color: var(--accent); }
+.hide-answered .item.done { display: none; }
+details.fold > summary { cursor: pointer; font-size: 13px; font-weight: 500; color: var(--accent); width: fit-content; list-style-position: outside; margin-left: 16px; }
+details.fold > summary .hint { color: var(--muted); font-weight: 400; }
+details.fold[open] > summary { margin-bottom: 8px; }
+details.fold > .body { display: grid; gap: 10px; font-size: 14px; }
+.opt-wrap .sub { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.opt-wrap .sub b { color: var(--ink); font-weight: 500; }
+.opt-wrap { border: 1px solid var(--line); border-radius: 6px; }
+.opt-wrap:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.opt-wrap .opt { border: 0; }
+.opt-wrap details.fold { padding: 0 12px 10px 38px; }
+.opt-wrap details.fold > summary { margin-left: 0; }
+.stakes { margin: 0; display: grid; grid-template-columns: minmax(8em, 11em) 1fr; gap: 4px 16px; font-size: 13px; color: var(--muted); }
+.stakes dt { font-weight: 500; }
+.stakes dd { margin: 0; min-width: 0; }
+.why { margin: 0; max-width: 70ch; font-size: 14px; }
+.promise summary { color: var(--ink); font-weight: 400; margin-left: 16px; }
+@media (max-width: 560px) { .stakes { grid-template-columns: 1fr; gap: 0; } .stakes dd { margin-bottom: 6px; } }
+.links { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; }
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.opt { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.opt-wrap .opt:has(input:checked) { background: transparent; }
+.opt input { margin: 4px 0 0; accent-color: var(--accent); }
+.opt .label { font-weight: 500; }
+.opt .sub { grid-column: 2; font-size: 13px; color: var(--muted); display: grid; gap: 2px; }
+.opt .sub b { color: var(--ink); font-weight: 500; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.seg button.reject[aria-pressed="true"] { background: var(--block); border-color: var(--block); color: var(--surface); }
+textarea, input[type="text"], input[type="number"] { width: 100%; font: 14px/1.4 var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+textarea { min-height: 64px; resize: vertical; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.row > input { flex: 1 1 180px; width: auto; }
+.proposed { font-size: 13px; color: var(--muted); }
+.check { display: flex; gap: 10px; align-items: center; font-weight: 500; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--ok); }
+button { font: 500 14px var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.small { font-size: 13px; padding: 4px 10px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dock { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--line); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
+.dock-inner { max-width: 860px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.status { font-size: 13px; color: var(--muted); flex: 1 1 200px; }
+.status.ok { color: var(--ok); }
+.status.err { color: var(--block); }
+.fallback { width: 100%; font: 12px var(--mono); min-height: 120px; }
+.empty { padding: 24px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="eyebrow">promise · decision sheet</div>
+    <h1 id="title">Decisions waiting on you</h1>
+    <p class="lede" id="lede"></p>
+    <p class="later" id="later" hidden></p>
+    <div class="progress"><span id="count"></span><div class="bar" aria-hidden="true"><i id="bar"></i></div><span id="blocking"></span></div>
+    <div class="tools">
+      <button type="button" class="small" id="expand">Show all details</button>
+      <button type="button" class="small" id="collapse">Hide all details</button>
+      <label class="check small-check" for="hide-answered"><input type="checkbox" id="hide-answered"> Hide answered</label>
+    </div>
+  </header>
+  <main id="groups"></main>
+  <dialog class="help" id="help" aria-labelledby="help-term">
+    <h3 id="help-term"></h3>
+    <p></p>
+    <form method="dialog"><button class="small">Close</button></form>
+  </dialog>
+</div>
+<div class="dock">
+  <div class="dock-inner">
+    <span class="status" id="status" role="status">Your answers stay in this browser until you save or copy them.</span>
+    <button type="button" id="copy">Copy answers</button>
+    <button type="button" class="primary" id="save" hidden>Save answers</button>
+  </div>
+</div>
+
+<script type="application/json" id="promise-sheet">{"format": "promise-sheet", "version": 1, "id": "5a6588bdeaaa", "title": "Channel muting decisions", "intro": "Four things wait on you before channel muting can be built: one open question in the doc, the toggle copy, a limit, and one step only you can run. Each one says why it is asked, what waits on it and what happens if you leave it.", "surface": "rich", "counts": {"items": 4, "blocking": 0, "later": 0, "laterBlocking": 0, "round": 4, "unresearched": 1, "researched": 0, "settledTogether": 0}, "docs": {"examples/channel-muting.md": {"title": "Channel muting", "status": "draft", "outcome": "A member can mute a channel so it stops notifying them.", "rules": ["A muted channel never sends a push or a badge count until it is unmuted.", "Muting is per member; it never changes what other members see."], "signal": "Ana mutes a busy channel and gets zero notifications from it for a day, then unmutes and notifications resume."}}, "warnings": [], "words": [{"term": "badge", "meaning": "The red number on the app icon that counts unread messages.", "aliases": [], "from": "asks"}, {"term": "push", "meaning": "A notification that shows on the phone's lock screen.", "aliases": [], "from": "asks"}], "unclear": [], "items": [{"id": "examples/channel-muting.md#Q1", "kind": "question", "doc": "examples/channel-muting.md", "q": "Q1", "docTitle": "Channel muting", "docStatus": "draft", "owner": "Ollie", "blocking": false, "text": "When a member mutes a channel, should its threads go quiet too?", "options": [{"label": "Muting a channel also mutes its threads", "recommended": true, "because": "it is the only answer under which the doc's own signal holds for every channel.", "commits": "one mute check read by both the channel and the thread notifier; no per-thread mute in this doc.", "think": "a member who follows one thread closely loses it until they unmute the whole channel.", "then": "the agent adds an acceptance row to §6 Acceptance (AT-4: a thread reply in a muted channel sends nothing), cites the thread send path in §5 Mechanism, and moves the question to §8 Decisions as a decision."}, {"label": "Threads keep notifying; thread muting is a later doc", "because": "the doc as written: it ships without thread-level muting.", "commits": "a follow-up doc for thread muting, and a narrower signal in §0 TLDR.", "think": "the signal fails for any channel with active threads, so §0 TLDR needs your edit before the doc can move on.", "then": "the agent opens a thread-muting doc as a thin draft and shows you the §0 TLDR line the signal would need."}], "evidence": [{"ref": "examples/channel-muting.md:20", "note": "the signal: zero notifications from the channel for a day"}, {"ref": "examples/channel-muting.md:68", "note": "every channel member is notified on every message (`messages.ts:88`); thread replies take the same path"}, {"ref": "examples/channel-muting.md:102", "note": "the question as the doc asks it"}], "why": "The doc says muting ships without thread-level muting, but its **How we'll know** signal says Ana gets zero notifications from the channel for a day. Thread replies notify today, so the doc as written can fail its own signal.", "blocks": "§5 Mechanism (which notifier reads the mute table) and a fourth acceptance row, if threads are included. Phase 1 of the build can start either way.", "ifNoAnswer": "The doc ships as written: threads keep notifying, and the signal is checked only in channels with no threads.", "example": "Ana mutes #general at 09:00. At 11:00 Ben replies in a thread Ana started last week. With threads muted, Ana gets nothing. Without, she gets a push from a channel she muted.", "docText": "should muting a channel also mute its threads? Not decided yet; ships without thread-level muting.", "surface": "ask-questions", "choices": ["Muting a channel also mutes its threads", null, "Threads keep notifying; thread muting is a later doc"]}, {"code": "- Turn off notifications\n+ Mute channel\n+ You won't get pushes or badges from this channel until you unmute it.", "evidence": [{"ref": "examples/channel-muting.md:18", "note": "rule 1: no push or badge count until unmuted"}], "group": "Other decisions", "why": "The toggle is the only place a member learns what muting does. The doc's first rule (no push and no badge from a muted channel) means the copy has to say both.", "blocks": "The settings screen in build phase 1.", "ifNoAnswer": "Phase 1 ships with the old label, which says nothing about badges.", "id": "copy-review", "kind": "approve", "text": "Approve the settings copy for the mute toggle", "surface": "rich"}, {"evidence": [{"ref": "examples/channel-muting.md:69", "note": "the send path checks the mute table before writing a notification"}], "group": "Other decisions", "why": "The send path reads the mute table before every notification. With no limit, one member with thousands of muted channels makes every send slower for everyone.", "blocks": "The schema in build phase 1 (the index on the mute table).", "ifNoAnswer": "No limit is set; the agent flags it as UNENFORCED in §4 Invariants.", "example": "Ben is in 800 channels and mutes 600 of them. At 500 he is told he has reached the limit and must unmute one first.", "id": "mute-limit", "kind": "input", "text": "How many channels may one member mute?", "proposed": 500, "inputType": "number", "surface": "rich"}, {"code": "./scripts/flags.sh set channel-mute on --env staging", "group": "Other decisions", "why": "The red tests in phase 1 run against staging, and they fail for the wrong reason while the flag is off.", "blocks": "Arming the doc: the red gate commit needs staging with the flag on.", "ifNoAnswer": "The agent waits. It cannot turn the flag on: that needs your staging credentials.", "id": "staging-flag", "kind": "confirm", "text": "Turn the mute flag on in staging", "doneLabel": "I turned it on", "surface": "rich"}]}</script>
+<script>
+(function () {
+  "use strict";
+  var sheet = JSON.parse(document.getElementById("promise-sheet").textContent);
+  var items = sheet.items || [];
+  var state = {};
+  var storeKey = "promise-sheet:" + sheet.id;
+  var db = null;
+
+  try { state = JSON.parse(localStorage.getItem(storeKey) || "{}") || {}; } catch (e) { state = {}; }
+  function persist() { try { localStorage.setItem(storeKey, JSON.stringify(state)); } catch (e) {} }
+
+  // Which folds the viewer opened, so a re-render (Accept all Recommended) keeps them.
+  var openKey = "promise-sheet-open:" + sheet.id, opened = {};
+  try { opened = JSON.parse(localStorage.getItem(openKey) || "{}") || {}; } catch (e) { opened = {}; }
+  function fold(key, summaryKids, bodyKids, cls) {
+    var d = el("details", { class: "fold" + (cls ? " " + cls : ""), "data-key": key }, [el("summary", {}, summaryKids), el("div", { class: "body" }, bodyKids)]);
+    d.open = !!opened[key];
+    d.addEventListener("toggle", function () {
+      if (d.open) opened[key] = 1; else delete opened[key];
+      try { localStorage.setItem(openKey, JSON.stringify(opened)); } catch (e) {}
+    });
+    return d;
+  }
+  function setAll(open) { document.querySelectorAll("details.fold").forEach(function (d) { d.open = open; }); }
+
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (k === "class") n.className = attrs[k];
+      else if (k === "text") n.textContent = attrs[k];
+      else if (k.slice(0, 2) === "on") n.addEventListener(k.slice(2), attrs[k]);
+      else n.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function (c) { if (c) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return n;
+  }
+
+  // Minimal Markdown: paragraphs, "- " lists, `code`, **bold**, [text](https://...). Everything is escaped first.
+  // The product's words (from the map's glossary, singular or plural): the first use on each card is a
+  // dotted-underlined button that opens its meaning. termSeen resets per card.
+  var termRe = null, termByWord = {}, termSeen = {};
+  (sheet.words || []).forEach(function (w) {
+    [w.term].concat(w.aliases || []).forEach(function (name) { termByWord[name.toLowerCase()] = w; });
+  });
+  delete termByWord[""];
+  var names = Object.keys(termByWord).sort(function (a, b) { return b.length - a.length; });
+  if (names.length) termRe = new RegExp("(^|[^\\w])(" + names.map(function (n) { return n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }).join("|") + ")((?:e?s)?)(?!\\w)", "gi");
+  function showHelp(w) {
+    var d = document.getElementById("help");
+    d.querySelector("h3").textContent = w.term;
+    d.querySelector("p").textContent = w.meaning;
+    d.showModal();
+  }
+  function terms(text, into) {
+    if (!termRe) { into.appendChild(document.createTextNode(text)); return; }
+    var last = 0, m;
+    termRe.lastIndex = 0;
+    while ((m = termRe.exec(text))) {
+      if (!m[0]) { termRe.lastIndex++; continue; }
+      var w = termByWord[m[2].toLowerCase()], start = m.index + m[1].length;
+      if (termSeen[w.term]) continue;
+      termSeen[w.term] = true;
+      if (start > last) into.appendChild(document.createTextNode(text.slice(last, start)));
+      into.appendChild(el("button", { type: "button", class: "term", text: m[2] + m[3], "aria-haspopup": "dialog",
+        onclick: (function (entry) { return function (e) { e.preventDefault(); e.stopPropagation(); showHelp(entry); }; })(w) }));
+      last = start + m[2].length + m[3].length;
+    }
+    if (last < text.length) into.appendChild(document.createTextNode(text.slice(last)));
+  }
+  function inline(text, into) {
+    var re = /`([^`]+)`|\*\*([^*]+)\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, last = 0, m;
+    while ((m = re.exec(text))) {
+      if (m.index > last) terms(text.slice(last, m.index), into);
+      if (m[1]) into.appendChild(el("code", { text: m[1] }));
+      else if (m[2]) into.appendChild(el("strong", { text: m[2] }));
+      else into.appendChild(el("a", { href: m[4], target: "_blank", rel: "noopener", text: m[3] }));
+      last = re.lastIndex;
+    }
+    if (last < text.length) terms(text.slice(last), into);
+    return into;
+  }
+  function markdown(text) {
+    var box = el("div", { class: "detail" });
+    String(text).split(/\n\s*\n/).forEach(function (block) {
+      var lines = block.split("\n");
+      if (lines.every(function (l) { return /^\s*[-*] /.test(l); })) {
+        var ul = el("ul");
+        lines.forEach(function (l) { ul.appendChild(inline(l.replace(/^\s*[-*] /, ""), el("li"))); });
+        box.appendChild(ul);
+      } else {
+        box.appendChild(inline(lines.join(" "), el("p")));
+      }
+    });
+    return box;
+  }
+
+  function answer(id) { return state[id] || (state[id] = {}); }
+  function recommended(item) {
+    var opts = item.options || [];
+    for (var i = 0; i < opts.length; i++) if (opts[i].recommended) return opts[i];
+    return null;
+  }
+
+  // The one-line answer that `decisions.py apply` writes into the doc, or "" while unanswered.
+  function summary(item) {
+    var a = state[item.id] || {}, note = (a.note || "").trim(), text = "";
+    if (item.kind === "question") {
+      if (a.choice === "__own__") text = (a.own || "").trim();
+      else if (a.choice) text = a.choice;
+      else if (!(item.options || []).length) text = (a.own || "").trim();
+    } else if (item.kind === "approve") {
+      text = { approve: "Approved", changes: "Changes requested", reject: "Rejected" }[a.verdict] || "";
+    } else if (item.kind === "input") {
+      text = String(a.value == null ? "" : a.value).trim();
+    } else if (item.kind === "confirm") {
+      text = a.done ? "Done" : "";
+    } else if (item.kind === "decided") {
+      text = a.ask ? "Ask me instead" : "";  // no answer keeps the agent's choice
+    }
+    if (!text) return "";
+    return note ? text + ". " + note : text;
+  }
+
+  function changed(id) { persist(); refresh(); if (id) mark(id); }
+
+  function mark(id) {
+    var card = document.getElementById("item-" + id);
+    var item = items.filter(function (i) { return i.id === id; })[0];
+    if (!card || !item) return;
+    var done = !!summary(item);
+    card.classList.toggle("done", done);
+    var t = card.querySelector(".tag.state");
+    t.textContent = item.kind === "decided" ? (done ? "you decide" : "stands") : (done ? "answered" : "open");
+    t.classList.toggle("done", done);
+  }
+
+  function noteBox(item, label) {
+    var a = answer(item.id);
+    var ta = el("textarea", { id: "note-" + item.id, placeholder: label || "Add a note (optional)", "aria-label": label || "Note" });
+    ta.value = a.note || "";
+    ta.addEventListener("input", function () { a.note = ta.value; changed(item.id); });
+    return ta;
+  }
+
+  function questionControls(item) {
+    var a = answer(item.id), opts = (item.options || []).slice();
+    var own = el("textarea", { id: "own-" + item.id, placeholder: "Your answer, in your words", "aria-label": "Your answer" });
+    own.value = a.own || "";
+    if (!opts.length) {
+      own.addEventListener("input", function () { a.own = own.value; changed(item.id); });
+      return [own];
+    }
+    opts.sort(function (x, y) { return (y.recommended ? 1 : 0) - (x.recommended ? 1 : 0); });
+    var list = opts.map(function (o) { return { value: o.label, option: o }; });
+    // "None of these" is a real option, never last: it goes straight after the recommended one.
+    list.splice(Math.min(1, list.length), 0, { value: "__own__", option: { label: "None of these — here's mine" } });
+    var fs = el("fieldset", {}, [el("legend", { text: item.text })]);
+    list.forEach(function (entry, n) {
+      var o = entry.option;
+      var radio = el("input", { type: "radio", name: "q-" + item.id, id: "q-" + item.id + "-" + n, value: entry.value });
+      radio.checked = a.choice === entry.value;
+      radio.addEventListener("change", function () { a.choice = entry.value; own.hidden = entry.value !== "__own__"; changed(item.id); });
+      var head = el("span", { class: "label" }, [o.label + " ", o.recommended ? el("span", { class: "tag rec", text: "Recommended" }) : null]);
+      // On the card: what the option is and why. Behind the fold: what it costs and what happens next.
+      var sub = el("span", { class: "sub" });
+      if (o.because) sub.appendChild(el("span", {}, [el("b", { text: "Selected because — " }), inline(o.because, el("span"))]));
+      var more = el("div", { class: "sub" });
+      if (o.detail) more.appendChild(inline(o.detail, el("span")));
+      [["commits", "Commits you to"], ["think", "Think about"], ["then", "What happens next"]].forEach(function (p) {
+        if (o[p[0]]) more.appendChild(el("span", {}, [el("b", { text: p[1] + " — " }), inline(o[p[0]], el("span"))]));
+      });
+      var names = [o.commits && "trade-offs", o.then && "what happens next"].filter(Boolean).join(" and ") || "more";
+      fs.appendChild(el("div", { class: "opt-wrap" }, [
+        el("label", { class: "opt", for: radio.id }, [radio, head, sub.childNodes.length ? sub : null]),
+        more.childNodes.length ? fold(item.id + "#opt" + n, [names.charAt(0).toUpperCase() + names.slice(1)], [more]) : null
+      ]));
+    });
+    own.hidden = a.choice !== "__own__";
+    own.addEventListener("input", function () { a.own = own.value; changed(item.id); });
+    return [fs, own, noteBox(item)];
+  }
+
+  function approveControls(item) {
+    var a = answer(item.id), seg = el("div", { class: "seg", role: "group", "aria-label": "Verdict" });
+    [["approve", "Approve"], ["changes", "Request changes"], ["reject", "Reject"]].forEach(function (v) {
+      var b = el("button", { type: "button", class: v[0] === "reject" ? "reject" : "", "aria-pressed": String(a.verdict === v[0]), text: v[1] });
+      b.addEventListener("click", function () {
+        a.verdict = a.verdict === v[0] ? "" : v[0];
+        seg.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
+        if (a.verdict) b.setAttribute("aria-pressed", "true");
+        changed(item.id);
+      });
+      seg.appendChild(b);
+    });
+    return [seg, noteBox(item, "What should change, or why (optional)")];
+  }
+
+  function inputControls(item) {
+    var a = answer(item.id);
+    var input = el("input", { type: item.inputType === "number" ? "number" : "text", id: "in-" + item.id, "aria-label": item.text, placeholder: item.placeholder || "" });
+    input.value = a.value == null ? "" : a.value;
+    input.addEventListener("input", function () { a.value = input.value; changed(item.id); });
+    var row = el("div", { class: "row" }, [input]);
+    if (item.proposed != null && item.proposed !== "") {
+      row.appendChild(el("button", { type: "button", class: "small", text: "Use proposed", onclick: function () { input.value = item.proposed; a.value = String(item.proposed); changed(item.id); } }));
+    }
+    var out = [row];
+    if (item.proposed != null && item.proposed !== "") out.push(el("div", { class: "proposed" }, [el("span", { text: "Proposed: " }), el("code", { text: String(item.proposed) })]));
+    out.push(noteBox(item));
+    return out;
+  }
+
+  function confirmControls(item) {
+    var a = answer(item.id);
+    var box = el("input", { type: "checkbox", id: "done-" + item.id });
+    box.checked = !!a.done;
+    box.addEventListener("change", function () { a.done = box.checked; changed(item.id); });
+    return [el("label", { class: "check", for: box.id }, [box, item.doneLabel || "I have done this"]), noteBox(item, "What happened (optional)")];
+  }
+
+  // An agent decision (§8, Owner agent) is read-only: it stands unless the human asks to decide it.
+  function decidedControls(item) {
+    var a = answer(item.id);
+    var b = el("button", { type: "button", "aria-pressed": String(!!a.ask), text: "Ask me instead" });
+    b.addEventListener("click", function () { a.ask = !a.ask; b.setAttribute("aria-pressed", String(!!a.ask)); changed(item.id); });
+    return [el("div", { class: "seg", role: "group", "aria-label": "Override" }, [b]), noteBox(item, "Why, or what you would choose (optional)")];
+  }
+
+  function card(item) {
+    termSeen = {};
+    var tags = [el("span", { class: "qid", text: item.q || (item.kind === "decided" ? item.id.split("#").pop() : item.id) })];
+    if (item.blocking === true) tags.push(el("span", { class: "tag blocking", text: "blocking" }));
+    else if (item.blocking === false) tags.push(el("span", { class: "tag", text: "non-blocking" }));
+    if (item.kind !== "question") tags.push(el("span", { class: "tag", text: { approve: "approval", input: "value", confirm: "to do", decided: "decided for you" }[item.kind] || item.kind }));
+    if (item.research === "answered" || item.research === "stale") tags.push(el("span", { class: "tag", text: item.research === "stale" ? "out of date" : "found by research" }));
+    tags.push(el("span", { class: "tag state", text: "open" }));
+    if (item.owner) tags.push(el("span", { class: "owner", text: "owner: " + item.owner }));
+    var kids = [el("div", { class: "item-head" }, tags), inline(item.text || "", el("p", { class: "text" }))];
+    // One decision, many questions: the answer is written under each of them.
+    if ((item.alsoAnswers || []).length) kids.push(el("p", { class: "later", text: "Also settles " + item.alsoAnswers.map(function (o) { return (o.docTitle ? o.docTitle + ": " : "") + o.text; }).join("; ") }));
+    // Three layers. On the card: what is decided, why, and what rides on it. Behind one fold:
+    // the example, detail and evidence a reader checks only to be sure. The thing being
+    // approved or run (an approval's diff, a to-do's command) and any image stay on the card.
+    if (item.why) kids.push(inline(item.why, el("p", { class: "why" })));
+    var stakes = el("dl", { class: "stakes" });
+    (item.kind === "decided" ? [["rollback", "Rollback"], ["reversibleUntil", "Reversible until"], ["review", "Review"], ["category", "Category"]]
+      : [["blocks", "What waits on it"], ["ifNoAnswer", "If you don't answer"]]).forEach(function (f) {
+      if (!item[f[0]]) return;
+      stakes.appendChild(el("dt", { text: f[1] }));
+      stakes.appendChild(el("dd", {}, [inline(item[f[0]], el("span"))]));
+    });
+    if (stakes.childNodes.length) kids.push(stakes);
+    if (item.image) kids.push(el("figure", {}, [el("img", { src: item.image, alt: item.imageAlt || "" })]));
+    var codeOnCard = item.code && (item.kind === "approve" || item.kind === "confirm");
+    if (codeOnCard) kids.push(el("pre", {}, [el("code", { text: item.code })]));
+    var deeper = [], parts = [];
+    // A question put in plain words keeps the doc's own words one fold down, for finding it there.
+    if (item.docText) { deeper.push(el("div", {}, [el("div", { class: "eyebrow", text: "In the doc" }), inline(item.docText, el("p"))])); parts.push("the doc's words"); }
+    if (item.example) { deeper.push(el("div", {}, [el("div", { class: "eyebrow", text: "Example" }), markdown(item.example)])); parts.push("example"); }
+    if (item.detail) { deeper.push(markdown(item.detail)); parts.push("detail"); }
+    if (item.code && !codeOnCard) { deeper.push(el("pre", {}, [el("code", { text: item.code })])); parts.push("code"); }
+    if ((item.evidence || []).length) {
+      deeper.push(el("div", {}, [el("div", { class: "eyebrow", text: "Evidence" }), el("ul", { class: "evidence" }, item.evidence.map(function (e) {
+        return el("li", {}, [e.ref ? el("code", { text: e.ref }) : null, e.note ? inline(" " + e.note, el("span")) : null]);
+      }))]));
+      parts.push(item.evidence.length + (item.evidence.length === 1 ? " source" : " sources"));
+    }
+    if ((item.links || []).length) {
+      deeper.push(el("div", { class: "links" }, item.links.map(function (l) {
+        return /^https?:\/\//.test(l.url || "") ? el("a", { href: l.url, target: "_blank", rel: "noopener", text: l.label || l.url }) : el("code", { text: l.label || l.url });
+      })));
+      parts.push("links");
+    }
+    if (deeper.length) kids.push(fold(item.id + "#more", ["Dig deeper ", el("span", { class: "hint", text: "· " + parts.join(" · ") })], deeper));
+    var controls = { question: questionControls, approve: approveControls, input: inputControls, confirm: confirmControls, decided: decidedControls }[item.kind] || questionControls;
+    controls(item).forEach(function (c) { kids.push(c); });
+    return el("section", { class: "item" + (item.blocking === true ? " blocking" : ""), id: "item-" + item.id }, kids);
+  }
+
+  function acceptRecommended(group) {
+    group.items.forEach(function (item) {
+      if (summary(item)) return;
+      var a = answer(item.id), rec = recommended(item);
+      if (item.kind === "question" && rec) a.choice = rec.label;
+      else if (item.kind === "input" && item.proposed != null && item.proposed !== "") a.value = String(item.proposed);
+    });
+    persist();
+    render();
+  }
+
+  function groups() {
+    var out = [], byKey = {};
+    items.forEach(function (item) {
+      var key = item.group || item.doc || "Other decisions";
+      // A named group (research's, or the agent's own) is titled by its name, not by a doc.
+      if (!byKey[key]) { byKey[key] = { key: key, title: item.groupTitle || (item.group ? item.group : item.docTitle) || key, path: item.group ? "" : (item.doc || ""), status: item.group ? "" : (item.docStatus || ""), items: [] }; out.push(byKey[key]); }
+      byKey[key].items.push(item);
+    });
+    return out;
+  }
+
+  function render() {
+    document.title = sheet.title || "Decision sheet";
+    document.getElementById("title").textContent = sheet.title || "Decisions waiting on you";
+    document.getElementById("lede").textContent = sheet.intro || "";
+    // A big backlog comes in rounds: this page is one, and says how many wait for later.
+    var later = (sheet.counts || {}).later || 0, laterEl = document.getElementById("later");
+    laterEl.hidden = !later;
+    var round = (sheet.counts || {}).round != null ? sheet.counts.round : items.length;
+    laterEl.textContent = later ? "This round: " + round + ". " + later + " more come in later rounds, once these are in." : "";
+    var root = document.getElementById("groups");
+    root.textContent = "";
+    if (!items.length) { root.appendChild(el("div", { class: "empty", text: "Nothing is waiting on you." })); refresh(); return; }
+    var main = el("div", { class: "wrap", style: "padding:0" });
+    groups().forEach(function (g) {
+      var canAccept = g.items.some(function (i) { return (i.kind === "question" && recommended(i)) || (i.kind === "input" && i.proposed != null && i.proposed !== ""); });
+      var head = el("div", { class: "group-head" }, [
+        el("div", {}, [el("h2", { text: g.title }), g.path ? el("div", { class: "path", text: g.path + (g.status ? " · Status: " + g.status : "") }) : null]),
+        canAccept ? el("button", { type: "button", class: "small", text: "Accept all Recommended", onclick: function () { acceptRecommended(g); } }) : null
+      ]);
+      var sec = el("section", { class: "group" }, [head]);
+      var doc = (sheet.docs || {})[g.path];
+      if (doc && (doc.outcome || (doc.rules || []).length || doc.signal)) {
+        // The outcome line is enough to place the questions; the rules and signal are one click away.
+        termSeen = {};  // the summary counts its own terms, outcome line first
+        var line = [el("b", { text: "Outcome: " }), inline(doc.outcome || "(no outcome line)", el("span"))];
+        var body = [];
+        if ((doc.rules || []).length) body.push(el("div", {}, [el("b", { text: "Rules:" }), el("ul", {}, doc.rules.map(function (r) { return inline(r, el("li")); }))]));
+        if (doc.signal) body.push(el("p", {}, [el("b", { text: "How we'll know: " }), inline(doc.signal, el("span"))]));
+        var promise = el("div", { class: "promise" }, [el("div", { class: "eyebrow", text: "What this doc promises (§0, as written)" })]);
+        if (body.length) promise.appendChild(fold("doc:" + g.path, line, body));
+        else promise.appendChild(el("p", {}, line));
+        sec.appendChild(promise);
+      }
+      var researched = g.key === "Checked by research";  // by name: a BLOCKING answer keeps its own card
+      if (g.key === "Decided for you") {
+        // A generated view of the docs' §8 agent decisions: nothing to answer; one fold down, each can be asked instead.
+        sec.appendChild(el("p", { class: "later", text: g.items.length + (g.items.length === 1 ? " choice" : " choices") + " the agent made under the doc's decision policy, each with its rollback. They stand unless you pick Ask me instead; that one becomes a question in the doc." }));
+        sec.appendChild(fold("decided:" + g.key, ["Show each choice ", el("span", { class: "hint", text: "· " + g.items.length })], g.items.map(card)));
+      } else if (researched) {
+        // What research found is checked in one go: one tap accepts it all; each card, with its
+        // evidence, is one fold down for anyone who wants to look.
+        sec.appendChild(el("p", { class: "later", text: g.items.length + (g.items.length === 1 ? " answer" : " answers") + " research found in the code and docs, each with its evidence. Accept all, or open any to check it first." }));
+        sec.appendChild(fold("research:" + g.key, ["Show each answer ", el("span", { class: "hint", text: "· " + g.items.length })], g.items.map(card)));
+      } else {
+        g.items.forEach(function (i) { sec.appendChild(card(i)); });
+      }
+      main.appendChild(sec);
+    });
+    root.appendChild(main);
+    items.forEach(function (i) { mark(i.id); });
+    refresh();
+  }
+
+  function refresh() {
+    var askable = items.filter(function (i) { return i.kind !== "decided"; });  // a decided item needs no answer
+    var answered = askable.filter(function (i) { return summary(i); }).length;
+    var blockingLeft = items.filter(function (i) { return i.blocking === true && i.group !== "Checked by research" && !summary(i); }).length;
+    document.getElementById("count").textContent = answered + " of " + askable.length + " answered";
+    document.getElementById("bar").style.width = (askable.length ? (100 * answered / askable.length) : 100) + "%";
+    document.getElementById("blocking").textContent = blockingLeft ? blockingLeft + " blocking left" : "no blocking questions left";
+  }
+
+  function payload() {
+    var answers = [];
+    items.forEach(function (item) {
+      var value = summary(item);
+      if (!value) return;
+      var a = state[item.id] || {};
+      var one = { id: item.id, kind: item.kind, doc: item.doc || null, q: item.q || null, value: value, choice: a.choice === "__own__" ? null : (a.choice || null), verdict: a.verdict || null, done: item.kind === "confirm" ? !!a.done : null, note: (a.note || "").trim() || null };
+      if (item.decision) one.decision = item.decision;  // the §8 row an "Ask me instead" names
+      answers.push(one);
+      (item.alsoAnswers || []).forEach(function (o) {
+        answers.push(Object.assign({}, one, { id: o.id, kind: o.kind || item.kind, doc: o.doc || null, q: o.q || null }));
+      });
+    });
+    return { format: "promise-answers", version: 1, sheet: sheet.id, savedAt: new Date().toISOString(), answers: answers };
+  }
+
+  function say(text, kind) { var s = document.getElementById("status"); s.textContent = text; s.className = "status" + (kind ? " " + kind : ""); }
+  function pasteText() { return "promise answers: paste this whole block back to the agent\n```json\n" + JSON.stringify(payload(), null, 2) + "\n```\n"; }
+
+  document.getElementById("copy").addEventListener("click", function () {
+    var text = pasteText();
+    function fallback() {
+      var ta = document.querySelector(".fallback") || el("textarea", { class: "fallback", readonly: "readonly", "aria-label": "Answers to copy" });
+      ta.value = text;
+      document.querySelector(".dock-inner").appendChild(ta);
+      ta.focus(); ta.select();
+      say("Copying was blocked. The answers are selected below: copy them by hand.", "err");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { say("Copied " + payload().answers.length + " answers. Paste them back to the agent.", "ok"); }, fallback);
+    } else fallback();
+  });
+
+  document.getElementById("expand").addEventListener("click", function () { setAll(true); });
+  document.getElementById("collapse").addEventListener("click", function () { setAll(false); });
+  var hide = document.getElementById("hide-answered");
+  hide.addEventListener("change", function () { document.body.classList.toggle("hide-answered", hide.checked); });
+
+  var saveBtn = document.getElementById("save");
+
+  // Inside a Claude artifact with the db capability, answers are saved where Claude reads them.
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("db").then(function (handle) {
+      if (!handle) return;
+      db = handle;
+      saveBtn.hidden = false;
+      saveBtn.textContent = "Save answers for Claude";
+      db.doc("answers/latest").get().then(function (snap) {
+        var local = null;
+        try { local = localStorage.getItem(storeKey); } catch (e) {}
+        if (!snap.exists || local) return;
+        var saved = snap.data() || {};
+        if (saved.sheet !== sheet.id || !saved.state) return;
+        state = saved.state; persist(); render();
+        say("Loaded the answers saved on " + saved.savedAt + ".");
+      }).catch(function () {});
+      saveBtn.addEventListener("click", function () {
+        var p = payload();
+        p.state = state;
+        saveBtn.disabled = true;
+        db.doc("answers/latest").set(p)
+          .then(function () { say("Saved " + p.answers.length + " answers. Tell Claude they are ready.", "ok"); })
+          .catch(function (e) { say("Not saved (" + ((e && e.code) || "error") + "). Copy the answers instead.", "err"); })
+          .then(function () { saveBtn.disabled = false; });
+      });
+    }).catch(function () {});
+  }
+
+  render();
+})();
+</script>
